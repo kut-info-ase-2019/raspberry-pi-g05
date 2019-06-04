@@ -1,33 +1,74 @@
-from datetime import datetime
-import time
 import RPi.GPIO as GPIO
+import time
+import os
+import pexpect # to automatically input password for scp
+import getpass
+from multiprocessing import Pool
 
-# インターバル
-INTERVAL = 3
-# スリープタイム
-SLEEPTIME = 20
+# set BCM_GPIO 17(wPi#0) as PIR pin
+PIRPin = 17
 # 使用するGPIO
 GPIO_PIN = 18
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(GPIO_PIN, GPIO.IN)
+def setup():
+    GPIO.setwarnings(False)
+    #set the gpio modes to BCM numbering
+    GPIO.setmode(GPIO.BCM)
+    #set BuzzerPin's mode to output,and initial level to HIGH(3.3V)
+    #GPIO.setup(BuzzerPin,GPIO.OUT,initial=GPIO.HIGH)
+    GPIO.setup(PIRPinIn,GPIO.IN)
+    GPIO.setup(PIRPinOut,GPIO.IN)
+
+def main():
+
+    while True:
+        #read Sw520dPin's level
+        if(GPIO.input(PIRPinIn)!=0):
+            starttime=time.time()
+            runtime = 0
+            print ('********************')
+            print ('*     In Sensor!     *')
+            print ('********************')
+            print ('\n')
+            while(runtime < 3):
+                runtime = time.time() - starttime
+                if(GPIO.input(PIRPinOut)!=0):
+                    print("=============")
+                    print("    Out    ")
+                    print("=============")
+                    time.sleep(5)
+                    setup()
+                    break
+            time.sleep(1)
+
+        elif(GPIO.input(PIRPinOut)!=0):
+            starttime=time.time()
+            runtime = 0
+            print ('*******************')
+            print ('*    Out Sensor    *')
+            print ('*******************')
+            print('\n')
+            while(runtime < 3):
+                runtime = time.time() - starttime
+                if(GPIO.input(PIRPinIn)!=0):
+                    print("===============")
+                    print("     In      ")
+                    print("===============")
+                    time.sleep(5)
+                    break
+            time.sleep(1)
+        else:
+            #print ('====================')
+            print ('=     Not alarm...  =')
+            #print ('====================')
+            print ('\n')
+        time.sleep(1)
 
 if __name__ == '__main__':
+    setup() # 色々初期化
     try:
-        print ("処理キャンセル：CTRL+C")
-        cnt = 1
-        while True:
-            # センサー感知
-            if(GPIO.input(GPIO_PIN) == GPIO.HIGH):
-                print(datetime.now().strftime('%Y/%m/%d %H:%M:%S') +
-                "：" + str("{0:05d}".format(cnt)) + "回目の人感知")
-                cnt = cnt + 1
-                time.sleep(SLEEPTIME)
-            else:
-                print(GPIO.input(GPIO_PIN))
-                time.sleep(INTERVAL)
+            main()
+    #when 'Ctrl+C' is pressed,child program destroy() will be executed.
     except KeyboardInterrupt:
-        print("終了処理中...")
-    finally:
-        GPIO.cleanup()
-        print("GPIO clean完了")
+        destroy()
+        pass
