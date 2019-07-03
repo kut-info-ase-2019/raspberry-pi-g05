@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import RPi.GPIO as GPIO
 import time
 
@@ -23,7 +24,6 @@ STATE_DATA_PULL_DOWN = 5
 GPIO_TRIG = 26
 GPIO_ECHO = 19
 
-
 # 初期化
 #setup function for some setup---custom function
 def setup():
@@ -37,16 +37,17 @@ def setup():
 	GPIO.setup(LEDPINRED,GPIO.OUT,initial=GPIO.LOW)
 
 	# 距離センサー
-	"""
-	初期化します
-	:param trig: Trigger用ピン番号、またはGPIO 番号
-	:param echo: Echo用ピン番号、またはGPIO 番号
-	:param mode: GPIO.BCM、または GPIO.BOARD (default:GPIO.BCM)
-	:return: なし
-	"""
+	#"""
+	#初期化します
+	#:param trig: Trigger用ピン番号、またはGPIO 番号
+	#:param echo: Echo用ピン番号、またはGPIO 番号
+	#:param mode: GPIO.BCM、または GPIO.BOARD (default:GPIO.BCM)
+	#:return: なし
+	#"""
 	GPIO.setup(GPIO_TRIG, GPIO.OUT)
 	GPIO.setup(GPIO_ECHO, GPIO.IN)
 
+# 温度と湿度を取る
 def read_dht11_dat():
 	GPIO.setup(DHTPIN, GPIO.OUT)
 	GPIO.output(DHTPIN, GPIO.HIGH)
@@ -105,7 +106,7 @@ def read_dht11_dat():
 			else:
 				continue
 	if len(lengths) != 40:
-		print("Data not good, skip")
+		print "Data not good, skip\n"
 		return False
 
 	shortest_pull_up = min(lengths)
@@ -120,7 +121,7 @@ def read_dht11_dat():
 		if length > halfway:
 			bit = 1
 		bits.append(bit)
-	print ("bits: %s, length: %d" % (bits, len(bits)))
+	print 'bits: %s, length: %d' % (bits, len(bits))
 	for i in range(0, len(bits)):
 		byte = byte << 1
 		if (bits[i]):
@@ -133,50 +134,23 @@ def read_dht11_dat():
 	print (the_bytes)
 	checksum = (the_bytes[0] + the_bytes[1] + the_bytes[2] + the_bytes[3]) & 0xFF
 	if the_bytes[4] != checksum:
-		print ("Data not good, skip")
+		print 'Data not good, skip\n'
 		return False
 
 	return the_bytes[0], the_bytes[2]
 
 def main():
-	print ("Raspberry Pi wiringPi DHT11 Temperature test program\n")
+	print 'Raspberry Pi wiringPi DHT11 Temperature test program\n'
 	while True:
-		print("距離：{0} cm".format(get_distance(GPIO_TRIG, GPIO_ECHO)))
+		print "距離：{0} cm".format(get_distance())
 		#time.sleep(1)
 		result = read_dht11_dat()
 		if result:
 			humidity, temperature = result
-			print ("humidity: %s %%,  Temperature: %s C" % (humidity, temperature))
-			heat_index = 0.81*temperature + 0.01*humidity*(0.99*temperature - 14.3) + 46.3 
-			print ("heat index: %s" % heat_index)
-			if heat_index < 75:
-				GPIO.output(LEDPINGREEN,GPIO.HIGH)
-				print('...LED ONn')
-				time.sleep(0.5)
-
-				GPIO.output(LEDPINGREEN,GPIO.LOW)
-				print('LED OFF...n')
-				time.sleep(0.5)
-			elif heat_index < 80:
-				GPIO.output(LEDPINYELLOW,GPIO.HIGH)
-				print('...LED ONn')
-				time.sleep(0.5)
-
-				GPIO.output(LEDPINYELLOW,GPIO.LOW)
-				print('LED OFF...n')
-				time.sleep(0.5)
-			else:
-				GPIO.output(LEDPINRED,GPIO.HIGH)
-				print('...LED ONn')
-				time.sleep(0.5)
-
-				GPIO.output(LEDPINRED,GPIO.LOW)
-				print('LED OFF...n')
-				time.sleep(0.5)
-
+			print 'humidity: %s %%,  Temperature: %s C' % (humidity, temperature)
+			heat_index = 0.81*temperature + 0.01*humidity*(0.99*temperature - 14.3) + 46.3
+			print 'heat index: %s\n' % heat_index
 		time.sleep(2)
-
-
 
 #define a destroy function for clean up everything after the script finished
 def destroy():
@@ -184,8 +158,6 @@ def destroy():
 	GPIO.output(LEDPIN,GPIO.LOW)
 	#release resource
 	GPIO.cleanup()
-
-
 
 # 超音波センサー
 def pulse_in(pin, value=GPIO.HIGH, timeout=1.0):
@@ -252,11 +224,10 @@ def get_distance(temp=15):
 	return dur * (331.50 + 0.61 * temp) * 50
 
 # Mainを動かすコード
-if __name__ == "__main__ain":
+if __name__ == '__main__':
 	setup()
 	try:
 		main()
 	except KeyboardInterrupt:
 		destroy()
 
-        
