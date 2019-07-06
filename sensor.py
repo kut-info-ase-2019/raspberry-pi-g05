@@ -140,10 +140,10 @@ def read_dht11_dat():
 	return the_bytes[0], the_bytes[2]
 
 def main():
-	print 'Raspberry Pi wiringPi DHT11 Temperature test program\n'
 	while True:
 		print "距離：{0} cm".format(get_distance())
-		#time.sleep(1)
+		t = time.sleep(1)
+		print t
 		result = read_dht11_dat()
 		if result:
 			humidity, temperature = result
